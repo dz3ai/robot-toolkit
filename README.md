@@ -81,6 +81,29 @@ visualize.py     — 3D arm visualization, convergence plots
 test_ik.py       — 7 tests + benchmark suite
 ```
 
+
+
+
+## C++ Extension (137x faster)
+
+```bash
+python setup.py build_ext --inplace
+```
+
+```python
+from ik_fast_wrapper import FastIKSolver
+
+solver = FastIKSolver(dh_params, joint_limits)
+success, angles, iters, errors = solver.ik_solve(target_pose)
+# Average: 0.09 ms (vs 12.6 ms pure Python)
+```
+
+| Metric | Python | C++ | Speedup |
+|--------|--------|-----|---------|
+| Avg solve | 12.6 ms | 0.09 ms | **137x** |
+| P50 solve | 5.4 ms | 0.03 ms | 180x |
+| P95 solve | 36.9 ms | 0.56 ms | 66x |
+
 ## License
 
 MIT — see LICENSE file.
