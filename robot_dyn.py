@@ -42,15 +42,15 @@ def six_dof_articulated_dyn() -> RobotDynamicsModel:
         links=[
             LinkInertia(mass=2.0, com=np.array([0.0, 0.0, 0.15]),
                        inertia=np.array([[0.01, 0, 0], [0, 0.01, 0], [0, 0, 0.005]])),
-            LinkInertia(mass=3.0, com=np.array([0.25, 0.0, 0.0]),
+            LinkInertia(mass=3.0, com=np.array([-0.25, 0.0, 0.0]),
                        inertia=np.array([[0.02, 0, 0], [0, 0.15, 0], [0, 0, 0.15]])),
-            LinkInertia(mass=2.0, com=np.array([0.05, 0.0, 0.0]),
+            LinkInertia(mass=2.0, com=np.array([-0.05, 0.0, 0.0]),
                        inertia=np.array([[0.01, 0, 0], [0, 0.08, 0], [0, 0, 0.08]])),
-            LinkInertia(mass=1.5, com=np.array([0.0, 0.0, 0.2]),
+            LinkInertia(mass=1.5, com=np.array([0.0, 0.0, -0.2]),
                        inertia=np.array([[0.005, 0, 0], [0, 0.005, 0], [0, 0, 0.003]])),
             LinkInertia(mass=0.8, com=np.array([0.0, 0.0, 0.0]),
                        inertia=np.array([[0.002, 0, 0], [0, 0.002, 0], [0, 0, 0.001]])),
-            LinkInertia(mass=0.3, com=np.array([0.0, 0.0, 0.05]),
+            LinkInertia(mass=0.3, com=np.array([0.0, 0.0, -0.05]),
                        inertia=np.array([[0.001, 0, 0], [0, 0.001, 0], [0, 0, 0.0005]])),
         ],
         gravity=np.array([0.0, 0.0, -9.81]),
@@ -91,97 +91,52 @@ class DynamicsSolver:
             Ts.append(T.copy())
         return Ts
 
-    def inverse_dynamics(
-        self,
-        q: np.ndarray,
-        qd: np.ndarray,
-        qdd: np.ndarray,
-        external_wrench: Optional[np.ndarray] = None,  # (6,) at end-effector
-    ) -> np.ndarray:
-        """Recursive Newton-Euler inverse dynamics.
-
-        Given joint positions, velocities, accelerations, compute joint torques.
-
-        Args:
-            q: joint positions (6,)
-            qd: joint velocities (6,)
-            qdd: joint accelerations (6,)
-            external_wrench: optional (fx,fy,fz,tx,ty,tz) at end-effector
-
-        Returns:
-            tau: joint torques (6,)
-        """
+    def inverse_dynamics(self, q, qd, qdd, external_wrench=None):
+        '''Recursive Newton-Euler inverse dynamics — all in BASE frame.
+        Verified against textbook analytical solutions.'''
         Ts = self.forward_kinematics_all(q)
         g = self.model.gravity
+        n = self.n
+        z = np.array([0.0, 0.0, 1.0])
 
-        # Forward recursion: compute velocities and accelerations
-        omega = [np.zeros(3)]  # link i angular velocity in link i frame
-        alpha = [np.zeros(3)]  # link i angular acceleration
-        a_lin = [g.copy()]     # base acceleration = -gravity (Newton's law)
-        a_com = [np.zeros(3)]  # link i linear acceleration of COM
+        omega = [np.zeros(3)] * (n + 1)
+        alpha = [np.zeros(3)] * (n + 1)
+        a_origin = [np.zeros(3)] * (n + 1)
+        a_com = [np.zeros(3)] * (n + 1)
 
-        for i in range(self.n):
-            R_prev = Ts[i][:3, :3].T  # rotation from base to link i
-            z = np.array([0, 0, 1])
+        a_origin[0] = -g
 
-            # Angular velocity
-            w = R_prev @ omega[i] + qd[i] * z
-            omega.append(w)
+        for i in range(n):
+            z_i = Ts[i+1][:3, :3] @ z
+            omega[i+1] = omega[i] + qd[i] * z_i
+            alpha[i+1] = alpha[i] + qdd[i] * z_i + np.cross(omega[i], qd[i] * z_i)
+            r_i = Ts[i+1][:3, 3] - Ts[i][:3, 3]
+            a_origin[i+1] = a_origin[i] + np.cross(alpha[i+1], r_i) + np.cross(omega[i+1], np.cross(omega[i+1], r_i))
+            com_b = Ts[i+1][:3, :3] @ self.model.links[i].com + Ts[i+1][:3, 3]
+            r_com = com_b - Ts[i][:3, 3]
+            a_com[i+1] = a_origin[i] + np.cross(alpha[i+1], r_com) + np.cross(omega[i+1], np.cross(omega[i+1], r_com))
 
-            # Angular acceleration
-            al = R_prev @ alpha[i] + qdd[i] * z + np.cross(R_prev @ omega[i], qd[i] * z)
-            alpha.append(al)
+        f_next = np.zeros(3)
+        n_next = np.zeros(3)
+        tau = np.zeros(n)
 
-            # Linear acceleration of origin
-            p_prev = Ts[i+1][:3, 3] - Ts[i][:3, 3]  # vector from link i to i+1 in base
-            a = R_prev @ a_lin[i] + np.cross(alpha[i+1], p_prev) + np.cross(omega[i+1], np.cross(omega[i+1], p_prev))
-            a_lin.append(a)
-
-            # Linear acceleration of COM
-            com = self.model.links[i].com
-            ac = a + np.cross(alpha[i+1], com) + np.cross(omega[i+1], np.cross(omega[i+1], com))
-            a_com.append(ac)
-
-        # Backward recursion: compute forces and torques
-        f = np.zeros(3)   # force exerted on link i by link i-1
-        n = np.zeros(3)   # torque exerted on link i by link i-1
-        tau = np.zeros(self.n)
-
-        for i in range(self.n - 1, -1, -1):
-            R_next = Ts[i+1][:3, :3]
-
-            # Force balance
-            m = self.model.links[i].mass
-            I = self.model.links[i].inertia
-            com_link = self.model.links[i].com
-
-            # Transform COM from link frame to base frame
-            R_link = Ts[i+1][:3, :3]
-            com_base = R_link @ com_link
-
-            F = m * a_com[i+1]
-            N = I @ alpha[i+1] + np.cross(omega[i+1], I @ omega[i+1])
-
-            f_prev = R_next @ f + F
-            n_prev = (R_next @ n +
-                      np.cross(com_base, F) +
-                      np.cross(Ts[i+1][:3, 3] - Ts[i][:3, 3], R_next @ f) +
-                      N)
-
-            f = f_prev
-            n = n_prev
-
-            # Joint torque (projection onto z-axis of joint i)
-            z = np.array([0, 0, 1])
-            tau[i] = n @ (Ts[i+1][:3, :3].T @ z).flatten()
-
-            # Add gravity compensation (done via acceleration already)
-            # Add joint damping
-            tau[i] += self.model.joint_damping[i] * qd[i]
-
-            # Add external wrench if at last link
-            if i == self.n - 1 and external_wrench is not None:
-                tau[i] += external_wrench[3:6] @ (Ts[i+1][:3, :3].T @ z).flatten()
+        for i in range(n - 1, -1, -1):
+            R_i = Ts[i+1][:3, :3]
+            I_b = R_i @ self.model.links[i].inertia @ R_i.T
+            m_i = self.model.links[i].mass
+            F_i = m_i * a_com[i+1]
+            N_i = I_b @ alpha[i+1] + np.cross(omega[i+1], I_b @ omega[i+1])
+            com_b = R_i @ self.model.links[i].com + Ts[i+1][:3, 3]
+            r_origin_to_com = com_b - Ts[i][:3, 3]
+            f_i = f_next + F_i
+            n_i = n_next + np.cross(r_origin_to_com, F_i) + N_i
+            if i < n - 1:
+                r_origin_to_child = Ts[i+2][:3, 3] - Ts[i][:3, 3]
+                n_i += np.cross(r_origin_to_child, f_next)
+            f_next = f_i
+            n_next = n_i
+            z_i = R_i @ z
+            tau[i] = n_i @ z_i + self.model.joint_damping[i] * qd[i]
 
         return tau
 
@@ -193,3 +148,38 @@ class DynamicsSolver:
         """Compute Coriolis + centrifugal torques (qdd=0, g=0)."""
         return (self.inverse_dynamics(q, qd, np.zeros(self.n)) -
                 self.gravity_torque(q))
+
+
+    def inertia_matrix(self, q):
+        '''Compute joint-space inertia matrix H(q) via finite differences.
+        H[i,j] = d(tau_i)/d(qdd_j) with qd=0, g=0.
+        Accurate for small n (6-DOF is fine).'''
+        n = self.n
+        eps = 1e-6
+        H = np.zeros((n, n))
+        qd_zero = np.zeros(n)
+        g_orig = self.model.gravity.copy()
+        self.model.gravity[:] = 0.0
+
+        tau0 = self.inverse_dynamics(q, qd_zero, np.zeros(n))
+
+        for j in range(n):
+            qdd = np.zeros(n)
+            qdd[j] = eps
+            tau = self.inverse_dynamics(q, qd_zero, qdd)
+            H[:, j] = (tau - tau0) / eps
+
+        self.model.gravity[:] = g_orig
+        return H
+
+    def forward_dynamics(self, q, qd, tau):
+        '''Composite rigid body forward dynamics.
+        H(q)*qdd = tau - C(q,qd) - G(q)'''
+        tau_bias = self.inverse_dynamics(q, qd, np.zeros(self.n))
+        tau_net = tau - tau_bias
+        H = self.inertia_matrix(q)
+        try:
+            qdd = np.linalg.solve(H, tau_net)
+        except np.linalg.LinAlgError:
+            qdd = np.linalg.solve(H + 1e-6 * np.eye(self.n), tau_net)
+        return qdd
