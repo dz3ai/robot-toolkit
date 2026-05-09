@@ -7,9 +7,9 @@ with DH parameters and LinkInertia entries.
 
 import xml.etree.ElementTree as ET
 import numpy as np
-import robot_dyn  # for type hints
+import robot_ik  # for type hints
 from typing import Tuple, List, Dict, Optional
-from robot_dyn import RobotDynamicsModel, LinkInertia
+from robot_ik.robot_dyn import RobotDynamicsModel, LinkInertia
 
 
 def _parse_origin(elem) -> Tuple[np.ndarray, np.ndarray]:
@@ -236,5 +236,5 @@ def urdf_to_dynamics_model(urdf_path: str) -> RobotDynamicsModel:
 
 def quick_urdf(urdf_path):
     # type: (...) -> DynamicsSolver
-    from robot_dyn import DynamicsSolver
+    from robot_ik.robot_dyn import DynamicsSolver
     return DynamicsSolver(urdf_to_dynamics_model(urdf_path))

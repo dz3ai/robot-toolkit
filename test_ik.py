@@ -2,7 +2,7 @@
 
 import numpy as np
 import time
-from ik_solver import (
+from robot_ik.ik_solver import (
     RobotModel, DHParam, dh_transform,
     six_dof_articulated,
 )

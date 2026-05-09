@@ -3,7 +3,7 @@
 import sys, os, time
 sys.path.insert(0, os.path.dirname(__file__))
 import numpy as np
-from robot_dyn import (
+from robot_ik import (
     RobotDynamicsModel, LinkInertia, DynamicsSolver, six_dof_articulated_dyn
 )
 

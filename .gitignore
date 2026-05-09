@@ -5,3 +5,5 @@ __pycache__/
 demo_ik_solutions.png
 build/
 *.so
+*.egg-info/
+build/

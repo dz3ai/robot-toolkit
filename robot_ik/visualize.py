@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from ik_solver import RobotModel
+from robot_ik.ik_solver import RobotModel
 
 
 def plot_robot(
@@ -88,7 +88,7 @@ def plot_convergence(errors, title="IK Convergence"):
 
 def demo():
     """Run a full demo: solve IK for random poses and visualize."""
-    from ik_solver import six_dof_articulated
+    from robot_ik.ik_solver import six_dof_articulated
 
     robot = six_dof_articulated()
     np.random.seed(42)

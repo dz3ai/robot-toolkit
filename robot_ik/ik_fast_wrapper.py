@@ -6,9 +6,9 @@ from typing import Tuple, Optional
 # Try loading C++ extension
 _has_fast = False
 try:
-    from ik_fast import forward_kinematics as _fk_cpp
-    from ik_fast import compute_jacobian as _jac_cpp
-    from ik_fast import ik_solve as _ik_cpp
+    from robot_ik.ik_fast import forward_kinematics as _fk_cpp
+    from robot_ik.ik_fast import compute_jacobian as _jac_cpp
+    from robot_ik.ik_fast import ik_solve as _ik_cpp
     _has_fast = True
 except ImportError:
     pass
@@ -27,14 +27,14 @@ class FastIKSolver:
     def forward_kinematics(self, q: np.ndarray) -> np.ndarray:
         if _has_fast:
             return _fk_cpp(self.dh, np.asarray(q, dtype=np.float64))
-        from ik_solver import RobotModel, DHParam
+        from robot_ik.ik_solver import RobotModel, DHParam
         robot = RobotModel([DHParam(*row) for row in self.dh])
         return robot.forward_kinematics(q)
 
     def compute_jacobian(self, q: np.ndarray) -> np.ndarray:
         if _has_fast:
             return _jac_cpp(self.dh, np.asarray(q, dtype=np.float64))
-        from ik_solver import RobotModel, DHParam
+        from robot_ik.ik_solver import RobotModel, DHParam
         robot = RobotModel([DHParam(*row) for row in self.dh])
         return robot.compute_jacobian(q)
 
@@ -45,7 +45,7 @@ class FastIKSolver:
             q0 = np.asarray(initial_guess if initial_guess is not None else np.zeros(6), dtype=np.float64)
             return _ik_cpp(self.dh, target, q0, self.limits,
                           max_iterations, position_tolerance, orientation_tolerance, damping)
-        from ik_solver import RobotModel, DHParam
+        from robot_ik.ik_solver import RobotModel, DHParam
         robot = RobotModel([DHParam(*row) for row in self.dh], 
                           [(self.limits[i,0], self.limits[i,1]) for i in range(6)])
         return robot.ik_solve(target, initial_guess, max_iterations,
