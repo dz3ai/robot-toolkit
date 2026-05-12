@@ -92,6 +92,13 @@ URDF import, and C++ acceleration. Pure Python fallbacks for everything.
 - [x] License consistency across project files
 - [x] setup.py license field verified
 
+### Phase 14 — PyPI Distribution Setup (2026-05-12)
+- [x] cibuildwheel GitHub Actions workflow (Linux/macOS/Windows)
+- [x] pyproject.toml with full PyPI metadata
+- [x] MANIFEST.in for package assets
+- [x] Release documentation (docs/RELEASE.md)
+- [x] Multi-platform wheel build configuration (Python 3.10-3.12)
+
 ---
 
 ---
@@ -102,12 +109,12 @@ URDF import, and C++ acceleration. Pure Python fallbacks for everything.
 |--------|-------|
 | Python LOC | ~4,500 |
 | C++ LOC | ~500 |
-| Total files | 36+ (source, tests, docs, LICENSE) |
+| Total files | 38+ (source, tests, docs, LICENSE, workflows) |
 | Test cases | 60+ |
 | Modules | 8 (IK, dynamics, trajectory, collision, path planning, visualization, URDF, ROS2) |
 | Version | 0.2.0 |
 | License | MIT |
-| Phases | 13/13 complete |
+| Phases | 14/14 complete |
 
 ---
 
