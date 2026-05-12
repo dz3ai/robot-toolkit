@@ -28,6 +28,14 @@ from robot_ik.trajectory import (
     waypoint_trajectory,
 )
 
+from robot_ik.collision import (
+    Sphere,
+    Capsule,
+    Box,
+    CollisionChecker,
+    CollisionResult,
+)
+
 # Try to import C++ extensions (optional)
 try:
     from robot_ik.ik_fast import forward_kinematics as _fk_cpp
@@ -59,5 +67,10 @@ __all__ = [
     "trapezoidal_velocity_profile",
     "s_curve_profile",
     "waypoint_trajectory",
+    "Sphere",
+    "Capsule",
+    "Box",
+    "CollisionChecker",
+    "CollisionResult",
     "HAS_IK_FAST", "HAS_DYN_FAST",
 ]
