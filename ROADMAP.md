@@ -1,6 +1,6 @@
 # robot-toolkit Roadmap
 
-Version: 0.2.0 | Last updated: 2026-05-10
+Version: 0.2.0 | Last updated: 2026-05-12
 
 ## Project Summary
 
@@ -87,6 +87,11 @@ URDF import, and C++ acceleration. Pure Python fallbacks for everything.
 - [x] Example scripts for common tasks
 - [x] API documentation updates
 
+### Phase 13 — License & Legal (2026-05-12)
+- [x] MIT LICENSE file added
+- [x] License consistency across project files
+- [x] setup.py license field verified
+
 ---
 
 ---
@@ -97,12 +102,12 @@ URDF import, and C++ acceleration. Pure Python fallbacks for everything.
 |--------|-------|
 | Python LOC | ~4,500 |
 | C++ LOC | ~500 |
-| Total files | 35+ (source, tests, docs) |
+| Total files | 36+ (source, tests, docs, LICENSE) |
 | Test cases | 60+ |
 | Modules | 8 (IK, dynamics, trajectory, collision, path planning, visualization, URDF, ROS2) |
 | Version | 0.2.0 |
 | License | MIT |
-| Phases | 12/12 complete |
+| Phases | 13/13 complete |
 
 ---
 
@@ -123,12 +128,81 @@ URDF import, and C++ acceleration. Pure Python fallbacks for everything.
 
 Potential areas for future development:
 
-- **Additional motion planning:** A*, RRT, CHOMP
-- **Advanced collision:** FCL integration, mesh-based collision
-- **Force control:** Hybrid position-force control
-- **Constraint-based programming:** Task space constraints
-- **Real-time control:** Rate-limiting, timing validation
-- **More robot models:** SCARA, delta, parallel manipulators
-- **Simulation integration:** PyBullet, MuJoCo, Gazebo
-- **Advanced visualization:** Real-time 3D viewer (meshcat/rerun)
-- **PyPI distribution:** Binary wheels for all platforms
+### Gaps & Limitations
+
+**Real-time capabilities**
+- No rate limiting or timing validation
+- No real-time control framework
+- Visualization limited to matplotlib (slow for live updates)
+
+**Collision detection**
+- Primitive shapes only (sphere, capsule, box)
+- No mesh-based collision (FCL integration)
+- Limited support for complex geometries
+
+**Distribution**
+- No PyPI package (manual pip install from source)
+- No binary wheels for cross-platform installation
+- C++ extensions require compiler toolchain
+
+**Robot model variety**
+- Only 6-DOF articulated manipulator
+- No SCARA, delta, or parallel manipulators
+- Limited pre-built models
+
+**Motion planning**
+- Only RRT* implemented
+- No CHOMP, A*, or trajectory optimization
+- Limited support for constraints beyond collision
+
+### Enhancement Priorities
+
+**High priority (adoption blockers)**
+1. **PyPI distribution with binary wheels**
+   - Lowers adoption barrier significantly
+   - Cross-platform installation (Linux/macOS/Windows)
+   - Tools: cibuildwheel, GitHub Actions
+
+2. **Real-time visualization**
+   - Critical for debugging motion planning
+   - Options: meshcat, rerun, or web-based viz
+   - Live trajectory preview and collision checking
+
+3. **Rate limiting framework**
+   - Required for hardware deployment
+   - Timing validation and control loops
+   - Integration with ROS2 real-time constraints
+
+**Medium priority (feature expansion)**
+4. **FCL/mesh-based collision**
+   - Needed for complex robot geometries
+   - Import STL/OBJ meshes from URDF
+   - Integration: python-fcl or PyBullet
+
+5. **Additional motion planners**
+   - CHOMP for trajectory optimization
+   - A* for grid-based planning
+   - Task space constraints (IK constraints)
+
+6. **More robot models**
+   - SCARA (4-DOF selective compliance)
+   - Delta parallel manipulator
+   - 7-DOF redundant manipulator
+
+**Lower priority (nice to have)**
+7. **Force control**
+   - Hybrid position-force control
+   - Impedance control
+   - Force/torque sensor integration
+
+8. **Simulation integration**
+   - PyBullet, MuJoCo, or Gazebo
+   - Physics validation and benchmarking
+   - Sim-to-real transfer tools
+
+9. **Constraint-based programming**
+   - Task space constraints
+   - Multi-task prioritization
+   - Nullspace projection
+
+---
