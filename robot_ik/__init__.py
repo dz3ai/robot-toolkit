@@ -36,6 +36,12 @@ from robot_ik.collision import (
     CollisionResult,
 )
 
+from robot_ik.path_planning import (
+    RRTStar,
+    PathPlanningResult,
+    plan_path_rrt_star,
+)
+
 # Try to import C++ extensions (optional)
 try:
     from robot_ik.ik_fast import forward_kinematics as _fk_cpp
@@ -72,5 +78,8 @@ __all__ = [
     "Box",
     "CollisionChecker",
     "CollisionResult",
+    "RRTStar",
+    "PathPlanningResult",
+    "plan_path_rrt_star",
     "HAS_IK_FAST", "HAS_DYN_FAST",
 ]
