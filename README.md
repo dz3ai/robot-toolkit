@@ -1,29 +1,42 @@
-# 6-DOF Inverse Kinematics Solver
+# robot-toolkit
 
-Jacobian-based iterative inverse kinematics for arbitrary 6-DOF serial manipulators.
-Given a desired end-effector pose, computes joint angles using damped least-squares.
+[![CI](https://github.com/dz3ai/robot-toolkit/workflows/CI/badge.svg)](https://github.com/dz3ai/robot-toolkit/actions)
+[![codecov](https://codecov.io/gh/dz3ai/robot-toolkit/branch/main/graph/badge.svg)](https://codecov.io/gh/dz3ai/robot-toolkit)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+Fast 6-DOF serial manipulator toolkit with IK, rigid body dynamics, and trajectory planning.
 
 **Key features:**
 - DH parameter forward kinematics
 - Damped least-squares IK (Levenberg-Marquardt)
-- Analytical Jacobian computation
-- Joint limit enforcement
-- Pre-built models: 6-DOF articulated, spherical wrist
+- Geometric Jacobian computation
+- Rigid body dynamics (RNEA, CRBA)
+- Trajectory planning (linear, cubic, quintic, trapezoidal, S-curve, Cartesian, waypoints)
+- C++ extensions (137x faster IK, 358x faster dynamics)
+- URDF parser
 - 3D visualization
-- <5 ms per solve (typical)
 
 ## Quick Start
 
 ```bash
+# Install dependencies
 pip install -r requirements.txt
+pip install -r requirements-dev.txt  # For development
+
+# Run tests
+pytest test_ik.py test_dyn.py test_trajectory.py
+
+# Run specific test suites
 python test_ik.py
-python visualize.py
+python test_dyn.py
+python test_trajectory.py
 ```
 
 ## Usage
 
 ```python
-from ik_solver import six_dof_articulated
+from robot_ik import six_dof_articulated
 import numpy as np
 
 robot = six_dof_articulated()
@@ -48,7 +61,8 @@ print(f"Position error: {np.linalg.norm(T[:3,3] - target[:3,3]):.6f} m")
 ## Custom Robot
 
 ```python
-from ik_solver import RobotModel, DHParam
+from robot_ik import RobotModel, DHParam
+import numpy as np
 
 my_robot = RobotModel([
     DHParam(a=0,   alpha=-np.pi/2, d=0.35, theta=0),
@@ -76,9 +90,17 @@ Benchmarked on 6-DOF articulated robot, 200 random target poses.
 ## Architecture
 
 ```
-ik_solver.py     — Core: DH FK, Jacobian, DLS IK solver, robot models
-visualize.py     — 3D arm visualization, convergence plots
-test_ik.py       — 7 tests + benchmark suite
+robot_ik/
+├── ik_solver.py        — Core: DH FK, Jacobian, DLS IK solver, robot models
+├── robot_dyn.py        — Rigid body dynamics: RNEA, CRBA, mass matrix
+├── trajectory.py       — Trajectory planning: interpolation, velocity profiles, waypoints
+├── urdf_parser.py      — URDF to dynamics model converter
+├── visualize.py        — 3D arm visualization, convergence plots
+└── __init__.py         — Package exports
+
+test_ik.py              — 7 IK tests + benchmark suite
+test_dyn.py             — Dynamics tests
+test_trajectory.py      — 12 trajectory planning tests
 ```
 
 

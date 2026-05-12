@@ -1,0 +1,17 @@
+# Development dependencies for robot-toolkit
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-xdist>=3.5.0  # parallel tests
+
+# Linting and formatting
+black>=24.4.0
+ruff>=0.4.0
+mypy>=1.9.0
+
+# Pre-commit
+pre-commit>=3.7.0
+
+# Coverage
+codecov>=0.2.12
