@@ -17,6 +17,17 @@ from robot_ik.urdf_parser import (
     urdf_to_dynamics_model, quick_urdf,
 )
 
+from robot_ik.trajectory import (
+    TrajectoryResult,
+    joint_linear_interpolation,
+    joint_cubic_interpolation,
+    joint_quintic_interpolation,
+    cartesian_straight_line,
+    trapezoidal_velocity_profile,
+    s_curve_profile,
+    waypoint_trajectory,
+)
+
 # Try to import C++ extensions (optional)
 try:
     from robot_ik.ik_fast import forward_kinematics as _fk_cpp
@@ -40,5 +51,13 @@ __all__ = [
     "LinkInertia", "RobotDynamicsModel", "DynamicsSolver",
     "six_dof_articulated_dyn",
     "urdf_to_dynamics_model", "quick_urdf",
+    "TrajectoryResult",
+    "joint_linear_interpolation",
+    "joint_cubic_interpolation",
+    "joint_quintic_interpolation",
+    "cartesian_straight_line",
+    "trapezoidal_velocity_profile",
+    "s_curve_profile",
+    "waypoint_trajectory",
     "HAS_IK_FAST", "HAS_DYN_FAST",
 ]
