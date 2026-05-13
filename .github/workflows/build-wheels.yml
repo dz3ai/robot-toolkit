@@ -34,14 +34,11 @@ jobs:
           CIBW_ARCHS_LINUX: auto64
           CIBW_ARCHS_MACOS: x86_64 arm64
           CIBW_ARCHS_WINDOWS: auto64
-          CIBW_BEFORE_BUILD_LINUX: yum install -y cmake gcc-c++ || apt-get update && apt-get install -y cmake g++
           CIBW_BEFORE_BUILD_MACOS: brew install cmake
           CIBW_BEFORE_BUILD_WINDOWS: pip install cmake
           CIBW_TEST_COMMAND: pytest {project}/test_ik.py {project}/test_dyn.py -v --no-header
           CIBW_TEST_REQUIRES: pytest numpy
-          CIBW_ENVIRONMENT_LINUX: CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-O3 -march=x86-64"
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
-          CIBW_ENVIRONMENT_WINDOWS: ""
 
       - uses: actions/upload-artifact@v4
         with:
