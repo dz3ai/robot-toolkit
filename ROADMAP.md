@@ -99,6 +99,12 @@ URDF import, and C++ acceleration. Pure Python fallbacks for everything.
 - [x] Release documentation (docs/RELEASE.md)
 - [x] Multi-platform wheel build configuration (Python 3.10-3.12)
 
+### Phase 15 — PyPI Token & First Release (2026-05-13)
+- [x] PyPI API token configured in GitHub secrets
+- [x] Version bumped to 0.3.0
+- [x] CI workflow fixes (YAML syntax, CMAKE_ARGS, portable wheels)
+- [x] Ready for first public PyPI release
+
 ---
 
 ---
@@ -112,9 +118,9 @@ URDF import, and C++ acceleration. Pure Python fallbacks for everything.
 | Total files | 38+ (source, tests, docs, LICENSE, workflows) |
 | Test cases | 60+ |
 | Modules | 8 (IK, dynamics, trajectory, collision, path planning, visualization, URDF, ROS2) |
-| Version | 0.2.0 |
+| Version | 0.3.0 |
 | License | MIT |
-| Phases | 14/14 complete |
+| Phases | 15/15 complete |
 
 ---
 
