@@ -7,7 +7,7 @@ ext_ik = Extension(
     sources=["ik_fast.cpp"],
     include_dirs=[pybind11.get_include()],
     language="c++",
-    extra_compile_args=["-O3", "-march=native", "-ffast-math"],
+    extra_compile_args=["-O3"],
 )
 
 ext_dyn = Extension(
@@ -15,7 +15,7 @@ ext_dyn = Extension(
     sources=["robot_dyn_fast.cpp"],
     include_dirs=[pybind11.get_include()],
     language="c++",
-    extra_compile_args=["-O3", "-march=native", "-ffast-math"],
+    extra_compile_args=["-O3"],
 )
 
 setup(
