@@ -3,7 +3,9 @@
 import numpy as np
 import time
 from robot_ik.ik_solver import (
-    RobotModel, DHParam, dh_transform,
+    RobotModel,
+    DHParam,
+    dh_transform,
     six_dof_articulated,
 )
 
@@ -14,7 +16,9 @@ def test_fk_identity():
     T = robot.forward_kinematics(np.zeros(6))
     assert T.shape == (4, 4), f"Expected 4x4, got {T.shape}"
     assert np.allclose(T[3, :], [0, 0, 0, 1]), "Bottom row should be [0,0,0,1]"
-    assert np.allclose(T[:3, :3] @ T[:3, :3].T, np.eye(3), atol=1e-10), "Rotation should be orthonormal"
+    assert np.allclose(
+        T[:3, :3] @ T[:3, :3].T, np.eye(3), atol=1e-10
+    ), "Rotation should be orthonormal"
     print(f"  [PASS] test_fk_identity (EE at {T[0,3]:.2f}, {T[1,3]:.2f}, {T[2,3]:.2f})")
 
 
@@ -29,7 +33,9 @@ def test_ik_roundtrip():
         success, q_solved, iters, errors = robot.ik_solve(target, max_iterations=300)
         if not success:
             # Retry from different initial guess
-            success, q_solved, iters2, errors2 = robot.ik_solve(target, max_iterations=300, initial_guess=np.random.uniform(-1, 1, 6))
+            success, q_solved, iters2, errors2 = robot.ik_solve(
+                target, max_iterations=300, initial_guess=np.random.uniform(-1, 1, 6)
+            )
             iters += iters2
 
         T = robot.forward_kinematics(q_solved)
@@ -89,21 +95,25 @@ def test_joint_limits():
         success, q_solved, _, _ = robot.ik_solve(target)
 
         for i, (lo, hi) in enumerate(robot.joint_limits):
-            assert lo - 1e-10 <= q_solved[i] <= hi + 1e-10, f"Joint {i}: {q_solved[i]:.2f} outside [{lo}, {hi}]"
+            assert (
+                lo - 1e-10 <= q_solved[i] <= hi + 1e-10
+            ), f"Joint {i}: {q_solved[i]:.2f} outside [{lo}, {hi}]"
     print("  [PASS] test_joint_limits (10 random poses)")
 
 
 def test_custom_robot():
     """Custom robot with simpler DH parameters should solve correctly."""
     # Simpler 6-DOF robot: all links have non-zero a, healthy workspace
-    robot = RobotModel([
-        DHParam(a=0.1, alpha=-np.pi/2, d=0.3, theta=0),
-        DHParam(a=0.25, alpha=0,       d=0,   theta=0),
-        DHParam(a=0.25, alpha=0,       d=0,   theta=0),
-        DHParam(a=0.1, alpha=-np.pi/2, d=0.2, theta=0),
-        DHParam(a=0,   alpha=np.pi/2,  d=0,   theta=0),
-        DHParam(a=0,   alpha=0,        d=0.05, theta=0),
-    ])
+    robot = RobotModel(
+        [
+            DHParam(a=0.1, alpha=-np.pi / 2, d=0.3, theta=0),
+            DHParam(a=0.25, alpha=0, d=0, theta=0),
+            DHParam(a=0.25, alpha=0, d=0, theta=0),
+            DHParam(a=0.1, alpha=-np.pi / 2, d=0.2, theta=0),
+            DHParam(a=0, alpha=np.pi / 2, d=0, theta=0),
+            DHParam(a=0, alpha=0, d=0.05, theta=0),
+        ]
+    )
     np.random.seed(999)
     for _ in range(10):
         q_orig = np.random.uniform(-0.8, 0.8, 6)

@@ -17,6 +17,7 @@ from robot_ik.collision import CollisionChecker, Sphere, Capsule
 @dataclass
 class PathPlanningResult:
     """Result of path planning."""
+
     success: bool
     path: np.ndarray = field(default_factory=lambda: np.zeros((0, 6)))  # (N, dof)
     cost: float = 0.0

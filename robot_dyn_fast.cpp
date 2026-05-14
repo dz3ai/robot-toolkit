@@ -174,9 +174,9 @@ py::array_t<double> inverse_dynamics_cpp(
         double com_link[3] = {com_arr(i,0), com_arr(i,1), com_arr(i,2)};
         double com_b[3];
         mat3_mul_vec3(R_i, com_link, com_b);
-        double r_com[3] = {com_b[0] + Ts[i+1][3] - Ts[i][3],
-                           com_b[1] + Ts[i+1][7] - Ts[i][7],
-                           com_b[2] + Ts[i+1][11] - Ts[i][11]};
+        double r_com[3] = {com_b[0] - Ts[i][3],
+                           com_b[1] - Ts[i][7],
+                           com_b[2] - Ts[i][11]};
 
         double cross_a_rc[3], cross_w_rc[3], cross_w_w_rc[3];
         cross3(alpha[i+1].data(), r_com, cross_a_rc);
@@ -238,8 +238,9 @@ py::array_t<double> inverse_dynamics_cpp(
         double com_link[3] = {com_arr(i,0), com_arr(i,1), com_arr(i,2)};
         double com_b[3];
         mat3_mul_vec3(R_i, com_link, com_b);
-        double com_abs[3] = {com_b[0] + Ts[i+1][3], com_b[1] + Ts[i+1][7], com_b[2] + Ts[i+1][11]};
-        double r_origin_to_com[3] = {com_abs[0] - Ts[i][3], com_abs[1] - Ts[i][7], com_abs[2] - Ts[i][11]};
+        double r_origin_to_com[3] = {com_b[0] - Ts[i][3],
+                                      com_b[1] - Ts[i][7],
+                                      com_b[2] - Ts[i][11]};
 
         // Force/moment balance
         double cross_r_F[3], f_i[3], n_i[3];

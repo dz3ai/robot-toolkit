@@ -1,4 +1,3 @@
-
 """3D visualization for the IK solver using matplotlib."""
 
 import numpy as np
@@ -45,18 +44,34 @@ def plot_robot(
     # Plot target if provided
     if target_pose is not None:
         tp = target_pose[:3, 3]
-        ax.scatter(tp[0], tp[1], tp[2], c="orange", s=120, marker="*",
-                   label="Target", alpha=0.8, edgecolors="black", linewidth=0.5)
+        ax.scatter(
+            tp[0],
+            tp[1],
+            tp[2],
+            c="orange",
+            s=120,
+            marker="*",
+            label="Target",
+            alpha=0.8,
+            edgecolors="black",
+            linewidth=0.5,
+        )
 
         # Draw target orientation axes
         axis_len = 0.15
         colors = ["r", "g", "b"]
         for i, color in enumerate(colors):
-            ax.quiver(tp[0], tp[1], tp[2],
-                      target_pose[0, i] * axis_len,
-                      target_pose[1, i] * axis_len,
-                      target_pose[2, i] * axis_len,
-                      color=color, alpha=0.6, linewidth=1.5)
+            ax.quiver(
+                tp[0],
+                tp[1],
+                tp[2],
+                target_pose[0, i] * axis_len,
+                target_pose[1, i] * axis_len,
+                target_pose[2, i] * axis_len,
+                color=color,
+                alpha=0.6,
+                linewidth=1.5,
+            )
 
     ax.set_xlabel("X (m)")
     ax.set_ylabel("Y (m)")
@@ -106,7 +121,9 @@ def demo():
         # Plot robot at solved config
         ax = fig.add_subplot(2, 2, i + 1, projection="3d")
         plot_robot(
-            robot, q_solved, target_pose=target,
+            robot,
+            q_solved,
+            target_pose=target,
             title=f"Solved in {iters} iters (err={errors[-1]:.1e})",
             ax=ax,
         )

@@ -1,19 +1,25 @@
 """Test suite for robot-dyn rigid body dynamics solver."""
 
 import sys, os, time
+
 sys.path.insert(0, os.path.dirname(__file__))
 import numpy as np
-from robot_ik import (
-    RobotDynamicsModel, LinkInertia, DynamicsSolver, six_dof_articulated_dyn
-)
+from robot_ik import RobotDynamicsModel, LinkInertia, DynamicsSolver, six_dof_articulated_dyn
 
 
 def test_pendulum_gravity():
     """1-DOF pendulum: gravity torque should match analytical mgL sin(theta)."""
     model = RobotDynamicsModel(
-        dh_a=np.array([1.0]), dh_alpha=np.array([0.0]), dh_d=np.array([0.0]),
-        links=[LinkInertia(mass=1.0, com=np.array([0.5, 0.0, 0.0]),
-                inertia=np.array([[0.1,0,0],[0,0.1,0],[0,0,0.1]]))],
+        dh_a=np.array([1.0]),
+        dh_alpha=np.array([0.0]),
+        dh_d=np.array([0.0]),
+        links=[
+            LinkInertia(
+                mass=1.0,
+                com=np.array([0.5, 0.0, 0.0]),
+                inertia=np.array([[0.1, 0, 0], [0, 0.1, 0], [0, 0, 0.1]]),
+            )
+        ],
         gravity=np.array([-9.81, 0.0, 0.0]),
         joint_damping=np.zeros(1),
     )
@@ -22,25 +28,29 @@ def test_pendulum_gravity():
         theta = np.deg2rad(deg)
         tau = solver.gravity_torque(np.array([theta]))
         expected = 1.0 * 9.81 * 0.5 * np.sin(theta)
-        # TODO: investigate 3x numerical discrepancy in pure Python solver
-        # assert abs(abs(tau[0]) - expected) < 0.02
-        if abs(abs(tau[0]) - expected) >= 0.02:
-            print(f"  [SKIP] test_pendulum_gravity at {deg}°: expected {expected:.4f}, got {tau[0]:.4f}")
-    print("  [PASS] test_pendulum_gravity (numerical investigation needed)")
+        assert abs(abs(tau[0]) - expected) < 0.02, f"Expected {expected:.4f}, got {tau[0]:.4f}"
+        print(f"  [PASS] test_pendulum_gravity at {deg}°: tau={tau[0]:.4f}")
 
 
 def test_pendulum_zero_velocity():
     """At zero velocity and acceleration, only gravity torque should be non-zero."""
     model = RobotDynamicsModel(
-        dh_a=np.array([1.0]), dh_alpha=np.array([0.0]), dh_d=np.array([0.0]),
-        links=[LinkInertia(mass=1.0, com=np.array([0.5, 0.0, 0.0]),
-                inertia=np.array([[0.1,0,0],[0,0.1,0],[0,0,0.1]]))],
+        dh_a=np.array([1.0]),
+        dh_alpha=np.array([0.0]),
+        dh_d=np.array([0.0]),
+        links=[
+            LinkInertia(
+                mass=1.0,
+                com=np.array([0.5, 0.0, 0.0]),
+                inertia=np.array([[0.1, 0, 0], [0, 0.1, 0], [0, 0, 0.1]]),
+            )
+        ],
         gravity=np.array([-9.81, 0.0, 0.0]),
         joint_damping=np.zeros(1),
     )
     solver = DynamicsSolver(model)
-    tau_full = solver.inverse_dynamics(np.array([np.pi/6]), np.zeros(1), np.zeros(1))
-    tau_grav = solver.gravity_torque(np.array([np.pi/6]))
+    tau_full = solver.inverse_dynamics(np.array([np.pi / 6]), np.zeros(1), np.zeros(1))
+    tau_grav = solver.gravity_torque(np.array([np.pi / 6]))
     assert abs(tau_full[0] - tau_grav[0]) < 1e-10
     print("  [PASS] test_pendulum_zero_velocity")
 
@@ -48,9 +58,16 @@ def test_pendulum_zero_velocity():
 def test_coriolis_no_gravity():
     """Coriolis torque should exclude gravity contribution."""
     model = RobotDynamicsModel(
-        dh_a=np.array([1.0]), dh_alpha=np.array([0.0]), dh_d=np.array([0.0]),
-        links=[LinkInertia(mass=1.0, com=np.array([0.5, 0.0, 0.0]),
-                inertia=np.array([[0.1,0,0],[0,0.1,0],[0,0,0.1]]))],
+        dh_a=np.array([1.0]),
+        dh_alpha=np.array([0.0]),
+        dh_d=np.array([0.0]),
+        links=[
+            LinkInertia(
+                mass=1.0,
+                com=np.array([0.5, 0.0, 0.0]),
+                inertia=np.array([[0.1, 0, 0], [0, 0.1, 0], [0, 0, 0.1]]),
+            )
+        ],
         gravity=np.array([-9.81, 0.0, 0.0]),
         joint_damping=np.zeros(1),
     )

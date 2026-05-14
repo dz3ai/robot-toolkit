@@ -2,7 +2,10 @@
 
 import numpy as np
 from robot_ik.collision import (
-    Sphere, Capsule, Box, CollisionChecker,
+    Sphere,
+    Capsule,
+    Box,
+    CollisionChecker,
     distance_sphere_to_sphere,
     distance_sphere_to_capsule,
     distance_capsule_to_capsule,
@@ -44,11 +47,7 @@ def test_sphere_capsule_distance():
     sphere = Sphere(radius=0.05)
     sphere.pose[:3, 3] = np.array([0.0, 0.0, 0.1])
 
-    capsule = Capsule(
-        p1=np.array([0.0, 0.0, 0.0]),
-        p2=np.array([0.0, 0.0, 0.2]),
-        radius=0.03
-    )
+    capsule = Capsule(p1=np.array([0.0, 0.0, 0.0]), p2=np.array([0.0, 0.0, 0.2]), radius=0.03)
 
     dist = distance_sphere_to_capsule(sphere, capsule)
     # Sphere center is at z=0.1, capsule spans z=[0, 0.2]
@@ -61,17 +60,9 @@ def test_sphere_capsule_distance():
 
 def test_capsule_capsule_distance():
     """Capsule-capsule distance computation."""
-    c1 = Capsule(
-        p1=np.array([0.0, 0.0, 0.0]),
-        p2=np.array([0.0, 0.0, 0.2]),
-        radius=0.03
-    )
+    c1 = Capsule(p1=np.array([0.0, 0.0, 0.0]), p2=np.array([0.0, 0.0, 0.2]), radius=0.03)
 
-    c2 = Capsule(
-        p1=np.array([0.2, 0.0, 0.0]),
-        p2=np.array([0.2, 0.0, 0.2]),
-        radius=0.03
-    )
+    c2 = Capsule(p1=np.array([0.2, 0.0, 0.0]), p2=np.array([0.2, 0.0, 0.2]), radius=0.03)
 
     dist = distance_capsule_to_capsule(c1, c2)
     # Parallel capsules, 0.2 apart in x
@@ -130,18 +121,22 @@ def test_self_collision_detection():
     # Configuration 1: No collision (links far apart)
     transforms = {
         "link1": np.eye(4),
-        "link2": np.array([
-            [1, 0, 0, 0.3],
-            [0, 1, 0, 0.0],
-            [0, 0, 1, 0.0],
-            [0, 0, 0, 1.0],
-        ]),
-        "link3": np.array([
-            [1, 0, 0, 0.6],
-            [0, 1, 0, 0.0],
-            [0, 0, 1, 0.0],
-            [0, 0, 0, 1.0],
-        ]),
+        "link2": np.array(
+            [
+                [1, 0, 0, 0.3],
+                [0, 1, 0, 0.0],
+                [0, 0, 1, 0.0],
+                [0, 0, 0, 1.0],
+            ]
+        ),
+        "link3": np.array(
+            [
+                [1, 0, 0, 0.6],
+                [0, 1, 0, 0.0],
+                [0, 0, 1, 0.0],
+                [0, 0, 0, 1.0],
+            ]
+        ),
     }
     result = checker.check_self_collision(transforms)
     assert result is None, "Expected no collision"
@@ -149,12 +144,14 @@ def test_self_collision_detection():
     # Configuration 2: Collision (link1 and link3 overlapping, non-adjacent)
     transforms = {
         "link1": np.eye(4),
-        "link2": np.array([
-            [1, 0, 0, 0.3],
-            [0, 1, 0, 0.0],
-            [0, 0, 1, 0.0],
-            [0, 0, 0, 1.0],
-        ]),
+        "link2": np.array(
+            [
+                [1, 0, 0, 0.3],
+                [0, 1, 0, 0.0],
+                [0, 0, 1, 0.0],
+                [0, 0, 0, 1.0],
+            ]
+        ),
         "link3": np.eye(4),  # Same as link1
     }
     result = checker.check_self_collision(transforms)
@@ -243,8 +240,9 @@ def test_contact_point_approximation():
 
     # Contact point should be roughly midpoint between sphere centers
     expected = np.array([0.075, 0.0, 0.0])
-    assert np.allclose(result.contact_point, expected, atol=0.01), \
-        f"Contact point mismatch: {result.contact_point} vs {expected}"
+    assert np.allclose(
+        result.contact_point, expected, atol=0.01
+    ), f"Contact point mismatch: {result.contact_point} vs {expected}"
 
     print("  [PASS] test_contact_point_approximation")
 

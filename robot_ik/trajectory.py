@@ -16,11 +16,12 @@ from robot_ik.ik_solver import RobotModel
 @dataclass
 class TrajectoryResult:
     """Result of trajectory generation."""
-    time_points: np.ndarray          # (N,) time in seconds
-    joint_positions: np.ndarray      # (N, dof) joint angles in radians
-    joint_velocities: np.ndarray     # (N, dof) rad/s
+
+    time_points: np.ndarray  # (N,) time in seconds
+    joint_positions: np.ndarray  # (N, dof) joint angles in radians
+    joint_velocities: np.ndarray  # (N, dof) rad/s
     joint_accelerations: np.ndarray  # (N, dof) rad/s^2
-    duration: float                  # total duration in seconds
+    duration: float  # total duration in seconds
 
 
 def joint_linear_interpolation(
@@ -114,11 +115,11 @@ def joint_cubic_interpolation(
         for i in range(dof):
             a0, a1, a2, a3 = coeffs[i]
             # Position
-            joint_positions[k, i] = a0 + a1*t + a2*t*t + a3*t*t*t
+            joint_positions[k, i] = a0 + a1 * t + a2 * t * t + a3 * t * t * t
             # Velocity: dq/dt = a1 + 2*a2*t + 3*a3*t^2
-            joint_velocities[k, i] = a1 + 2*a2*t + 3*a3*t*t
+            joint_velocities[k, i] = a1 + 2 * a2 * t + 3 * a3 * t * t
             # Acceleration: d2q/dt2 = 2*a2 + 6*a3*t
-            joint_accelerations[k, i] = 2*a2 + 6*a3*t
+            joint_accelerations[k, i] = 2 * a2 + 6 * a3 * t
 
     return TrajectoryResult(
         time_points=time_points,
@@ -170,14 +171,16 @@ def joint_quintic_interpolation(
     # Quintic coefficients: solve 6x6 system for each joint
     # Matrix form: M * [a0, a1, a2, a3, a4, a5]^T = b
     T = duration
-    M = np.array([
-        [1, 0,     0,      0,       0,       0     ],  # q(0)
-        [0, 1,     0,      0,       0,       0     ],  # dq(0)
-        [0, 0,     2,      0,       0,       0     ],  # d2q(0)
-        [1, T,     T*T,    T*T*T,   T*T*T*T, T*T*T*T*T],  # q(T)
-        [0, 1,     2*T,    3*T*T,   4*T*T*T, 5*T*T*T*T],  # dq(T)
-        [0, 0,     2,      6*T,     12*T*T,  20*T*T*T],  # d2q(T)
-    ])
+    M = np.array(
+        [
+            [1, 0, 0, 0, 0, 0],  # q(0)
+            [0, 1, 0, 0, 0, 0],  # dq(0)
+            [0, 0, 2, 0, 0, 0],  # d2q(0)
+            [1, T, T * T, T * T * T, T * T * T * T, T * T * T * T * T],  # q(T)
+            [0, 1, 2 * T, 3 * T * T, 4 * T * T * T, 5 * T * T * T * T],  # dq(T)
+            [0, 0, 2, 6 * T, 12 * T * T, 20 * T * T * T],  # d2q(T)
+        ]
+    )
 
     joint_positions = np.zeros((n_samples, dof))
     joint_velocities = np.zeros((n_samples, dof))
@@ -188,13 +191,28 @@ def joint_quintic_interpolation(
         coeffs = np.linalg.solve(M, b)  # [a0, a1, a2, a3, a4, a5]
 
         for k, t in enumerate(time_points):
-            t2, t3, t4, t5 = t*t, t*t*t, t*t*t*t, t*t*t*t*t
+            t2, t3, t4, t5 = t * t, t * t * t, t * t * t * t, t * t * t * t * t
             # Position
-            joint_positions[k, i] = coeffs[0] + coeffs[1]*t + coeffs[2]*t2 + coeffs[3]*t3 + coeffs[4]*t4 + coeffs[5]*t5
+            joint_positions[k, i] = (
+                coeffs[0]
+                + coeffs[1] * t
+                + coeffs[2] * t2
+                + coeffs[3] * t3
+                + coeffs[4] * t4
+                + coeffs[5] * t5
+            )
             # Velocity
-            joint_velocities[k, i] = coeffs[1] + 2*coeffs[2]*t + 3*coeffs[3]*t2 + 4*coeffs[4]*t3 + 5*coeffs[5]*t4
+            joint_velocities[k, i] = (
+                coeffs[1]
+                + 2 * coeffs[2] * t
+                + 3 * coeffs[3] * t2
+                + 4 * coeffs[4] * t3
+                + 5 * coeffs[5] * t4
+            )
             # Acceleration
-            joint_accelerations[k, i] = 2*coeffs[2] + 6*coeffs[3]*t + 12*coeffs[4]*t2 + 20*coeffs[5]*t3
+            joint_accelerations[k, i] = (
+                2 * coeffs[2] + 6 * coeffs[3] * t + 12 * coeffs[4] * t2 + 20 * coeffs[5] * t3
+            )
 
     return TrajectoryResult(
         time_points=time_points,
@@ -227,21 +245,25 @@ def _slerp(R_start: np.ndarray, R_end: np.ndarray, t: float) -> np.ndarray:
         return R_start
 
     # Axis-angle interpolation
-    axis = np.array([
-        R_diff[2, 1] - R_diff[1, 2],
-        R_diff[0, 2] - R_diff[2, 0],
-        R_diff[1, 0] - R_diff[0, 1],
-    ]) / (2 * np.sin(angle))
+    axis = np.array(
+        [
+            R_diff[2, 1] - R_diff[1, 2],
+            R_diff[0, 2] - R_diff[2, 0],
+            R_diff[1, 0] - R_diff[0, 1],
+        ]
+    ) / (2 * np.sin(angle))
 
     # Interpolated angle
     angle_t = angle * t
 
     # Rodrigues formula for rotation matrix
-    K = np.array([
-        [0, -axis[2], axis[1]],
-        [axis[2], 0, -axis[0]],
-        [-axis[1], axis[0], 0],
-    ])
+    K = np.array(
+        [
+            [0, -axis[2], axis[1]],
+            [axis[2], 0, -axis[0]],
+            [-axis[1], axis[0], 0],
+        ]
+    )
     R_interp = np.eye(3) + np.sin(angle_t) * K + (1 - np.cos(angle_t)) * (K @ K)
 
     return R_interp @ R_start
@@ -302,13 +324,13 @@ def cartesian_straight_line(
         T_t[:3, :3] = R_t
 
         # Solve IK
-        success, q_t, _, _ = robot.ik_solve(T_t, initial_guess=joint_positions[k-1])
+        success, q_t, _, _ = robot.ik_solve(T_t, initial_guess=joint_positions[k - 1])
 
         if success:
             joint_positions[k] = q_t
         else:
             # Fallback: use previous configuration
-            joint_positions[k] = joint_positions[k-1]
+            joint_positions[k] = joint_positions[k - 1]
 
     # Compute velocities via finite differences
     joint_velocities = np.zeros((n_samples, 6))
@@ -374,11 +396,11 @@ def trapezoidal_velocity_profile(
         # If we use triangular profile (no cruise): t = 2 * t_acc, d = 2 * 0.5 * a * t_acc^2 = a * t_acc^2
         # So t_acc = sqrt(d / a), v_peak = a * t_acc = sqrt(d * a)
         # With cruise: v = min(v_max, some_value based on duration)
-        
+
         # Time to accelerate to v_max: t_acc_max = v_max / a_max
         # Distance during accel+decel at v_max: 2 * 0.5 * a * t_acc_max^2 = v_max^2 / a_max
-        min_dist_for_vmax = v_max[i]**2 / a_max[i]
-        
+        min_dist_for_vmax = v_max[i] ** 2 / a_max[i]
+
         if dist <= min_dist_for_vmax:
             # Triangular profile (never reaches v_max)
             # t_total = 2 * sqrt(dist / a) if we use full a_max
@@ -405,7 +427,7 @@ def trapezoidal_velocity_profile(
             # Remaining distance for cruise
             d_cruise = dist - min_dist_for_vmax
             t_cruise = d_cruise / v_max[i]
-            
+
             # Check if total time fits in duration
             t_min = t_acc + t_cruise + t_dec
             if t_min <= duration:
@@ -452,7 +474,9 @@ def trapezoidal_velocity_profile(
                 d_decel_covered = v_peak * t_in_phase - 0.5 * a_inst * t_in_phase**2
                 d_acc_phase = 0.5 * (v_peak / t_acc if t_acc > 1e-10 else 0) * t_acc**2
                 d_cruise_phase = v_peak * t_cruise
-                joint_positions[k, i] = q_start[i] + (d_acc_phase + d_cruise_phase + d_decel_covered) * direction
+                joint_positions[k, i] = (
+                    q_start[i] + (d_acc_phase + d_cruise_phase + d_decel_covered) * direction
+                )
             else:
                 # At target
                 joint_positions[k, i] = q_end[i]
@@ -521,7 +545,7 @@ def s_curve_profile(
         t_j = a_max[i] / j_max[i]
 
         # Distance during first jerk phase: d_j = 1/6 * j_max * t_j^3
-        d_j = (1.0/6.0) * j_max[i] * t_j**3
+        d_j = (1.0 / 6.0) * j_max[i] * t_j**3
 
         # Velocity and position at end of first jerk phase
         v_j = 0.5 * j_max[i] * t_j**2  # Should equal a_max * t_j
@@ -536,18 +560,23 @@ def s_curve_profile(
             # Use quintic-like smoothing for simplicity (continuous jerk)
             # This approximates S-curve behavior
             tau = t / duration
-            tau2, tau3, tau4, tau5 = tau*tau, tau*tau*tau, tau*tau*tau*tau, tau*tau*tau*tau*tau
+            tau2, tau3, tau4, tau5 = (
+                tau * tau,
+                tau * tau * tau,
+                tau * tau * tau * tau,
+                tau * tau * tau * tau * tau,
+            )
 
             # Smooth step function (3rd order polynomial)
             # s(tau) = 10*tau^3 - 15*tau^4 + 6*tau^5
-            s = 10*tau3 - 15*tau4 + 6*tau5
+            s = 10 * tau3 - 15 * tau4 + 6 * tau5
 
             # Velocity: ds/dtau = 30*tau^2 - 60*tau^3 + 30*tau^4
-            ds_dtau = 30*tau2 - 60*tau3 + 30*tau4
+            ds_dtau = 30 * tau2 - 60 * tau3 + 30 * tau4
             v = dist / duration * ds_dtau
 
             # Acceleration: d2s/dtau2
-            d2s_dtau2 = 60*tau - 180*tau2 + 120*tau3
+            d2s_dtau2 = 60 * tau - 180 * tau2 + 120 * tau3
             a = dist / (duration**2) * d2s_dtau2
 
             joint_positions[k, i] = q_start[i] + s * dist * direction
@@ -619,7 +648,7 @@ def waypoint_trajectory(
             # We blend the last part of the current segment to smoothly transition
             blend_samples = int(blend_radius / dt)
             blend_start_idx = max(0, len(segment_time) - blend_samples)
-            
+
             for k in range(blend_start_idx, len(segment_time)):
                 # Blend weight: linear from 0 to 1 across blend region
                 blend_tau = (k - blend_start_idx) / (len(segment_time) - blend_start_idx)
@@ -634,9 +663,15 @@ def waypoint_trajectory(
                     prev_acc = np.array(all_acc[-1])
 
                     # Smoothly blend towards the current segment's values
-                    segment.joint_positions[k] = (1 - blend_tau_smooth) * prev_pos + blend_tau_smooth * segment.joint_positions[k]
-                    segment.joint_velocities[k] = (1 - blend_tau_smooth) * prev_vel + blend_tau_smooth * segment.joint_velocities[k]
-                    segment.joint_accelerations[k] = (1 - blend_tau_smooth) * prev_acc + blend_tau_smooth * segment.joint_accelerations[k]
+                    segment.joint_positions[k] = (
+                        1 - blend_tau_smooth
+                    ) * prev_pos + blend_tau_smooth * segment.joint_positions[k]
+                    segment.joint_velocities[k] = (
+                        1 - blend_tau_smooth
+                    ) * prev_vel + blend_tau_smooth * segment.joint_velocities[k]
+                    segment.joint_accelerations[k] = (
+                        1 - blend_tau_smooth
+                    ) * prev_acc + blend_tau_smooth * segment.joint_accelerations[k]
 
         # Append to global trajectory (avoid duplicating waypoint)
         if i == 0:

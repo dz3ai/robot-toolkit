@@ -1,4 +1,3 @@
-
 """URDF Parser — extract dynamics parameters from URDF robot models.
 
 Converts URDF <link>/<joint> elements to RobotDynamicsModel
@@ -30,11 +29,13 @@ def _rpy_to_rot(rpy):
     cr, sr = np.cos(rpy[0]), np.sin(rpy[0])
     cp, sp = np.cos(rpy[1]), np.sin(rpy[1])
     cy, sy = np.cos(rpy[2]), np.sin(rpy[2])
-    return np.array([
-        [cy*cp, cy*sp*sr - sy*cr, cy*sp*cr + sy*sr],
-        [sy*cp, sy*sp*sr + cy*cr, sy*sp*cr - cy*sr],
-        [-sp,   cp*sr,            cp*cr],
-    ])
+    return np.array(
+        [
+            [cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr],
+            [sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr],
+            [-sp, cp * sr, cp * cr],
+        ]
+    )
 
 
 def _parse_inertia(elem) -> Tuple[float, np.ndarray, np.ndarray]:
@@ -59,11 +60,13 @@ def _parse_inertia(elem) -> Tuple[float, np.ndarray, np.ndarray]:
         ixy_val = float(ixx.attrib.get("ixy", "0"))
         ixz_val = float(ixx.attrib.get("ixz", "0"))
         iyz_val = float(ixx.attrib.get("iyz", "0"))
-        I = np.array([
-            [ixx_val, ixy_val, ixz_val],
-            [ixy_val, iyy_val, iyz_val],
-            [ixz_val, iyz_val, izz_val],
-        ])
+        I = np.array(
+            [
+                [ixx_val, ixy_val, ixz_val],
+                [ixy_val, iyy_val, iyz_val],
+                [ixz_val, iyz_val, izz_val],
+            ]
+        )
 
     return mass_val, com_xyz, I
 
@@ -114,9 +117,14 @@ def urdf_to_dynamics_model(urdf_path: str) -> RobotDynamicsModel:
                 hi = float(lim.attrib["upper"])
 
         joints[name] = {
-            "type": jtype, "parent": parent, "child": child,
-            "xyz": xyz, "rpy": rpy, "axis": axis,
-            "lower": lo, "upper": hi,
+            "type": jtype,
+            "parent": parent,
+            "child": child,
+            "xyz": xyz,
+            "rpy": rpy,
+            "axis": axis,
+            "lower": lo,
+            "upper": hi,
         }
 
     # Find root link
@@ -208,8 +216,7 @@ def urdf_to_dynamics_model(urdf_path: str) -> RobotDynamicsModel:
                 # For simplicity at zero config: COM_DH = COM_urdf - [a, 0, d]
                 com_dh = com_urdf - np.array([a, 0.0, d])
 
-                link_inertias.append(LinkInertia(
-                    mass=m, com=com_dh, inertia=I_urdf))
+                link_inertias.append(LinkInertia(mass=m, com=com_dh, inertia=I_urdf))
 
                 # Compute child transform for recursion
                 # T_child = parent_T * T_joint * R_z(theta) where theta will be q
@@ -237,4 +244,5 @@ def urdf_to_dynamics_model(urdf_path: str) -> RobotDynamicsModel:
 def quick_urdf(urdf_path):
     # type: (...) -> DynamicsSolver
     from robot_ik.robot_dyn import DynamicsSolver
+
     return DynamicsSolver(urdf_to_dynamics_model(urdf_path))

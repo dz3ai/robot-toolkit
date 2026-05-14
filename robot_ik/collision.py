@@ -19,6 +19,7 @@ from enum import Enum
 
 class GeometryType(Enum):
     """Primitive geometry types for collision shapes."""
+
     SPHERE = "sphere"
     CAPSULE = "capsule"
     BOX = "box"
@@ -27,6 +28,7 @@ class GeometryType(Enum):
 @dataclass
 class Sphere:
     """Sphere defined by center and radius."""
+
     radius: float = 0.05
     pose: np.ndarray = field(default_factory=lambda: np.eye(4))
 
@@ -34,6 +36,7 @@ class Sphere:
 @dataclass
 class Capsule:
     """Capsule defined by line segment (p1, p2) and radius."""
+
     p1: np.ndarray = field(default_factory=lambda: np.zeros(3))
     p2: np.ndarray = field(default_factory=lambda: np.array([0, 0, 0.1]))
     radius: float = 0.04
@@ -43,6 +46,7 @@ class Capsule:
 @dataclass
 class Box:
     """Box defined by center and dimensions (x, y, z)."""
+
     size: np.ndarray = field(default_factory=lambda: np.array([0.1, 0.1, 0.1]))
     pose: np.ndarray = field(default_factory=lambda: np.eye(4))
 
@@ -50,6 +54,7 @@ class Box:
 @dataclass
 class CollisionResult:
     """Result of collision check."""
+
     is_colliding: bool
     distance: float  # Minimum distance (negative if penetrating)
     contact_point: Optional[np.ndarray]  # Contact point if colliding
@@ -255,7 +260,7 @@ class CollisionChecker:
         # Check all pairs
         link_names = list(self.link_geometries.keys())
         for i, name1 in enumerate(link_names):
-            for j, name2 in enumerate(link_names[i + 1:], start=i + 1):
+            for j, name2 in enumerate(link_names[i + 1 :], start=i + 1):
                 # Skip adjacent links (by index in the kinematic chain)
                 if ignore_adjacent and j - i <= 1:
                     continue
@@ -268,6 +273,7 @@ class CollisionChecker:
 
                         # Create temporary geometries with applied transforms
                         import copy
+
                         g1 = copy.deepcopy(geom1)
                         g2 = copy.deepcopy(geom2)
                         g1.pose = T1 @ g1.pose
@@ -299,6 +305,7 @@ class CollisionChecker:
 
             for geom in geometries:
                 import copy
+
                 g = copy.deepcopy(geom)
                 g.pose = link_transforms[link_name] @ g.pose
 

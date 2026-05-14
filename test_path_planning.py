@@ -17,14 +17,16 @@ def test_rrt_star_basic():
         checker.add_link_geometry(f"link{i}", sphere)
 
     # Joint limits (radians)
-    joint_limits = np.array([
-        [-np.pi, np.pi],
-        [-np.pi/2, np.pi/2],
-        [-np.pi, np.pi],
-        [-np.pi, np.pi],
-        [-np.pi/2, np.pi/2],
-        [-np.pi, np.pi],
-    ])
+    joint_limits = np.array(
+        [
+            [-np.pi, np.pi],
+            [-np.pi / 2, np.pi / 2],
+            [-np.pi, np.pi],
+            [-np.pi, np.pi],
+            [-np.pi / 2, np.pi / 2],
+            [-np.pi, np.pi],
+        ]
+    )
 
     start = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     goal = np.array([0.5, 0.3, 0.5, 0.0, 0.0, 0.0])
@@ -69,18 +71,21 @@ def test_rrt_star_collision():
 
     # Add obstacle
     from robot_ik.collision import Box
+
     obstacle = Box(size=np.array([0.2, 0.2, 0.2]))
     obstacle.pose[:3, 3] = np.array([0.3, 0.0, 0.4])
     checker.add_obstacle(obstacle)
 
-    joint_limits = np.array([
-        [-np.pi, np.pi],
-        [-np.pi/2, np.pi/2],
-        [-np.pi, np.pi],
-        [-np.pi, np.pi],
-        [-np.pi/2, np.pi/2],
-        [-np.pi, np.pi],
-    ])
+    joint_limits = np.array(
+        [
+            [-np.pi, np.pi],
+            [-np.pi / 2, np.pi / 2],
+            [-np.pi, np.pi],
+            [-np.pi, np.pi],
+            [-np.pi / 2, np.pi / 2],
+            [-np.pi, np.pi],
+        ]
+    )
 
     start = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     goal = np.array([0.8, 0.0, 0.0, 0.0, 0.0, 0.0])
@@ -101,8 +106,9 @@ def test_rrt_star_collision():
     print(f"  Planning time: {result.planning_time:.2f}s")
 
     # Should find a path around the obstacle
-    assert result.success or result.nodes_explored >= planner.max_iterations, \
-        "Expected either success or max iterations reached"
+    assert (
+        result.success or result.nodes_explored >= planner.max_iterations
+    ), "Expected either success or max iterations reached"
 
     if result.success:
         # Verify path is collision-free (sample check)
@@ -123,14 +129,16 @@ def test_convenience_function():
     robot = six_dof_articulated()
     checker = CollisionChecker()
 
-    joint_limits = np.array([
-        [-np.pi, np.pi],
-        [-np.pi/2, np.pi/2],
-        [-np.pi, np.pi],
-        [-np.pi, np.pi],
-        [-np.pi/2, np.pi/2],
-        [-np.pi, np.pi],
-    ])
+    joint_limits = np.array(
+        [
+            [-np.pi, np.pi],
+            [-np.pi / 2, np.pi / 2],
+            [-np.pi, np.pi],
+            [-np.pi, np.pi],
+            [-np.pi / 2, np.pi / 2],
+            [-np.pi, np.pi],
+        ]
+    )
 
     start = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     goal = np.array([0.3, 0.2, 0.3, 0.0, 0.0, 0.0])

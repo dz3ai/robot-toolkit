@@ -1,4 +1,3 @@
-
 """6-DOF Inverse Kinematics Solver — Robot IP Core
 
 Jacobian-based iterative IK with DH parameter forward kinematics.
@@ -17,10 +16,11 @@ from typing import List, Optional, Tuple
 @dataclass
 class DHParam:
     """Single Denavit-Hartenberg link parameter."""
-    a: float       # link length (meters)
-    alpha: float   # link twist (radians)
-    d: float       # link offset (meters)
-    theta: float   # joint angle (radians) — variable for revolute joints
+
+    a: float  # link length (meters)
+    alpha: float  # link twist (radians)
+    d: float  # link offset (meters)
+    theta: float  # joint angle (radians) — variable for revolute joints
 
 
 def dh_transform(dh: DHParam) -> np.ndarray:
@@ -30,18 +30,22 @@ def dh_transform(dh: DHParam) -> np.ndarray:
     """
     ct, st = np.cos(dh.theta), np.sin(dh.theta)
     ca, sa = np.cos(dh.alpha), np.sin(dh.alpha)
-    return np.array([
-        [ct, -st * ca,  st * sa, dh.a * ct],
-        [st,  ct * ca, -ct * sa, dh.a * st],
-        [0,        sa,       ca,       dh.d],
-        [0,         0,        0,          1],
-    ])
+    return np.array(
+        [
+            [ct, -st * ca, st * sa, dh.a * ct],
+            [st, ct * ca, -ct * sa, dh.a * st],
+            [0, sa, ca, dh.d],
+            [0, 0, 0, 1],
+        ]
+    )
 
 
 class RobotModel:
     """Serial manipulator defined by Denavit-Hartenberg parameters."""
 
-    def __init__(self, dh_params: List[DHParam], joint_limits: Optional[List[Tuple[float, float]]] = None):
+    def __init__(
+        self, dh_params: List[DHParam], joint_limits: Optional[List[Tuple[float, float]]] = None
+    ):
         """
         Args:
             dh_params: List of DH parameters, one per joint (6 for 6-DOF).
@@ -91,8 +95,8 @@ class RobotModel:
         J = np.zeros((6, len(joint_angles)))
         for i in range(len(joint_angles)):
             T_i = transforms[i]  # transform to frame i
-            z_i = T_i[:3, 2]     # z-axis of frame i (rotation axis)
-            p_i = T_i[:3, 3]     # origin of frame i
+            z_i = T_i[:3, 2]  # z-axis of frame i (rotation axis)
+            p_i = T_i[:3, 3]  # origin of frame i
 
             # Linear velocity contribution
             J[:3, i] = np.cross(z_i, p_ee - p_i)
@@ -103,7 +107,7 @@ class RobotModel:
 
     def ik_solve(
         self,
-        target_pose: np.ndarray,           # 4x4 homogeneous transform
+        target_pose: np.ndarray,  # 4x4 homogeneous transform
         initial_guess: Optional[np.ndarray] = None,
         max_iterations: int = 200,
         position_tolerance: float = 1e-4,  # meters
@@ -142,11 +146,13 @@ class RobotModel:
             R_error = target_rot @ current_rot.T
             theta = np.arccos(np.clip((np.trace(R_error) - 1) / 2, -1, 1))
             if abs(theta) > 1e-10:
-                axis = np.array([
-                    R_error[2, 1] - R_error[1, 2],
-                    R_error[0, 2] - R_error[2, 0],
-                    R_error[1, 0] - R_error[0, 1],
-                ]) / (2 * np.sin(theta))
+                axis = np.array(
+                    [
+                        R_error[2, 1] - R_error[1, 2],
+                        R_error[0, 2] - R_error[2, 0],
+                        R_error[1, 0] - R_error[0, 1],
+                    ]
+                ) / (2 * np.sin(theta))
                 orient_error = theta * axis
             else:
                 orient_error = np.zeros(3)
@@ -156,8 +162,10 @@ class RobotModel:
             errors.append(total_err)
 
             # Check convergence
-            if (np.linalg.norm(pos_error) < position_tolerance and
-                np.linalg.norm(orient_error) < orientation_tolerance):
+            if (
+                np.linalg.norm(pos_error) < position_tolerance
+                and np.linalg.norm(orient_error) < orientation_tolerance
+            ):
                 # Clamp to joint limits
                 q = np.clip(q, [l[0] for l in self.joint_limits], [l[1] for l in self.joint_limits])
                 return True, q, iteration + 1, errors
@@ -192,26 +200,30 @@ class RobotModel:
 # Pre-built robot models
 # ============================================================
 
+
 def six_dof_articulated():
     """Standard 6-DOF articulated robot (like a typical industrial arm).
 
     DH parameters for a 6R anthropomorphic arm with spherical wrist.
     """
-    return RobotModel([
-        DHParam(a=0,    alpha=-np.pi/2, d=0.3,  theta=0),  # Base rotation
-        DHParam(a=0.5,  alpha=0,        d=0,    theta=0),  # Shoulder
-        DHParam(a=0.1,  alpha=-np.pi/2, d=0,    theta=0),  # Elbow
-        DHParam(a=0,    alpha=np.pi/2,  d=0.4,  theta=0),  # Wrist 1
-        DHParam(a=0,    alpha=-np.pi/2, d=0,    theta=0),  # Wrist 2
-        DHParam(a=0,    alpha=0,        d=0.1,  theta=0),  # Wrist 3 (tool)
-    ], joint_limits=[
-        (-np.pi, np.pi),           # Base: full rotation
-        (-np.pi/2, np.pi/2),       # Shoulder: -90 to +90 degrees
-        (-np.pi*3/4, np.pi*3/4),   # Elbow
-        (-np.pi, np.pi),           # Wrist 1
-        (-np.pi/2, np.pi/2),       # Wrist 2
-        (-np.pi, np.pi),           # Wrist 3
-    ])
+    return RobotModel(
+        [
+            DHParam(a=0, alpha=-np.pi / 2, d=0.3, theta=0),  # Base rotation
+            DHParam(a=0.5, alpha=0, d=0, theta=0),  # Shoulder
+            DHParam(a=0.1, alpha=-np.pi / 2, d=0, theta=0),  # Elbow
+            DHParam(a=0, alpha=np.pi / 2, d=0.4, theta=0),  # Wrist 1
+            DHParam(a=0, alpha=-np.pi / 2, d=0, theta=0),  # Wrist 2
+            DHParam(a=0, alpha=0, d=0.1, theta=0),  # Wrist 3 (tool)
+        ],
+        joint_limits=[
+            (-np.pi, np.pi),  # Base: full rotation
+            (-np.pi / 2, np.pi / 2),  # Shoulder: -90 to +90 degrees
+            (-np.pi * 3 / 4, np.pi * 3 / 4),  # Elbow
+            (-np.pi, np.pi),  # Wrist 1
+            (-np.pi / 2, np.pi / 2),  # Wrist 2
+            (-np.pi, np.pi),  # Wrist 3
+        ],
+    )
 
 
 def spherical_wrist_6dof():
@@ -219,11 +231,13 @@ def spherical_wrist_6dof():
 
     Used to verify numerical IK against closed-form solutions.
     """
-    return RobotModel([
-        DHParam(a=0,    alpha=0,        d=0.3,  theta=0),
-        DHParam(a=0.3,  alpha=-np.pi/2, d=0,    theta=0),
-        DHParam(a=0.3,  alpha=0,        d=0,    theta=0),
-        DHParam(a=0,    alpha=-np.pi/2, d=0.3,  theta=0),
-        DHParam(a=0,    alpha=np.pi/2,  d=0,    theta=0),
-        DHParam(a=0,    alpha=-np.pi/2, d=0.1,  theta=0),
-    ])
+    return RobotModel(
+        [
+            DHParam(a=0, alpha=0, d=0.3, theta=0),
+            DHParam(a=0.3, alpha=-np.pi / 2, d=0, theta=0),
+            DHParam(a=0.3, alpha=0, d=0, theta=0),
+            DHParam(a=0, alpha=-np.pi / 2, d=0.3, theta=0),
+            DHParam(a=0, alpha=np.pi / 2, d=0, theta=0),
+            DHParam(a=0, alpha=-np.pi / 2, d=0.1, theta=0),
+        ]
+    )
