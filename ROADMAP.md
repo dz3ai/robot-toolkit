@@ -104,6 +104,66 @@ URDF import, and C++ acceleration. Pure Python fallbacks for everything.
 - [x] Version bumped to 0.3.0
 - [x] CI workflow fixes (YAML syntax, CMAKE_ARGS, portable wheels)
 - [x] Ready for first public PyPI release
+- [ ] Monitor CI build status (queued as of 2026-05-14)
+- [ ] Publish to PyPI once CI passes
+
+---
+
+---
+
+## In Progress (Phase 15b - Tutorial Examples)
+
+### Phase 15b — Tutorial Examples from Challenges (2026-05-14)
+**Goal**: Create 4 tutorial examples based on `docs/challenges.md`
+
+**Status**: Planning complete, implementation pending
+
+**Tutorials**:
+- [ ] Tutorial 1: Dual-arm workspace analysis (FK sampling, overlap calculation)
+- [ ] Tutorial 2: Self-collision detection (CollisionChecker, contact viz)
+- [ ] Tutorial 3: Coordinated trajectory planning (waypoint, time sync)
+- [ ] Tutorial 4: Collision-free path planning (RRT*, collision constraints)
+
+**Deliverables**:
+- [ ] Create `examples/tutorials/` directory
+- [ ] Implement 4 example scripts with docstrings
+- [ ] Create Jupyter notebooks for each tutorial
+- [ ] Update README with tutorial section
+- [ ] Add to documentation site
+
+**Estimated effort**: 4-6 hours
+
+---
+
+## Planned (Phase 16+)
+
+### Phase 16 — Dual-Arm Coordination Framework
+**Goal**: Master-slave control and constraint-based programming
+
+**Features**:
+- [ ] MasterSlaveController class
+- [ ] ClosedChainConstraint for dual-arm object holding
+- [ ] Real-time communication between robot instances
+- [ ] Constraint-based trajectory optimization
+
+**Tutorials**:
+- [ ] Tutorial 5: Master-slave coordinated grasping
+- [ ] Tutorial 6: Closed-chain constraint control
+
+**Estimated effort**: 8-12 hours
+
+### Phase 17 — Advanced Features
+- [ ] Force control (hybrid position-force, impedance)
+- [ ] Vision system integration (multi-camera calibration)
+- [ ] FCL/mesh-based collision detection
+- [ ] Simulation integration (PyBullet/MuJoCo)
+
+**Tutorials**:
+- [ ] Tutorial 7: Dual-arm assembly with force control
+- [ ] Tutorial 8: Vision-guided manipulation
+- [ ] Tutorial 9: Real-time mesh collision with FCL
+
+**Estimated effort**: 16-24 hours
 
 ---
 
