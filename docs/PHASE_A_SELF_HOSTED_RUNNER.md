@@ -17,19 +17,27 @@
 
 ## 步骤 1: 准备设置脚本
 
-设置脚本已创建: `/tmp/mac_mini_runner_setup.sh`
+设置脚本已创建: `docs/scripts/mac_mini_runner_setup.sh`
+
+**脚本特性**:
+- ✓ 询问自定义安装位置（默认: `$HOME/local/runner`）
+- ✓ 自动检查磁盘空间（需要 5GB）
+- ✓ 空间不足时提示确认
+- ✓ 自动扩展 `~` 为完整路径
+- ✓ 更好的错误处理
 
 **复制到 Mac mini**:
 
 ```bash
 # 方法 1: 通过 AirDrop 或 USB
-# 复制脚本到 Mac mini
+# 复制整个 robot-toolkit 仓库到 Mac mini
 
 # 方法 2: 通过 SSH (如果 Mac mini 已启用远程登录)
-scp /tmp/mac_mini_runner_setup.sh dannyz@<mac-mini-ip>:~/
+scp docs/scripts/mac_mini_runner_setup.sh dannyz@<mac-mini-ip>:~/
 
-# 方法 3: 直接在 Mac mini 上创建
-# 复制脚本内容，在 Mac mini 上创建文件
+# 方法 3: 直接在 Mac mini 上下载
+# git clone https://github.com/dz3ai/robot-toolkit.git
+# cd robot-toolkit/docs/scripts
 ```
 
 ---
@@ -207,7 +215,27 @@ brew install cmake
 brew install pyenv
 ```
 
-### 问题 3: 权限问题
+### 问题 4: 磁盘空间不足
+
+**症状**: 脚本提示 "磁盘空间不足!"
+
+**解决**:
+```bash
+# 检查空间
+df -h
+
+# 清理建议:
+# 1. 清空 Xcode 缓存
+rm -rf ~/Library/Developer/Xcode/DerivedData/*
+
+# 2. 清理 Homebrew 缓存
+brew cleanup
+
+# 3. 选择其他安装目录
+# 重新运行脚本，输入不同的路径
+```
+
+### 问题 5: 权限问题
 
 **症状**: Runner 无法拉取代码或上传 artifacts
 

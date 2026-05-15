@@ -4,7 +4,7 @@
 
 ### 1. 复制脚本到 Mac mini
 ```bash
-scp /tmp/mac_mini_runner_setup.sh dannyz@<mac-mini-ip>:~/
+scp docs/scripts/mac_mini_runner_setup.sh dannyz@<mac-mini-ip>:~/
 ```
 
 ### 2. SSH 到 Mac mini 并运行
@@ -13,6 +13,14 @@ ssh dannyz@<mac-mini-ip>
 chmod +x ~/mac_mini_runner_setup.sh
 ~/mac_mini_runner_setup.sh
 ```
+
+**脚本会询问**:
+- 安装目录（默认: `$HOME/local/runner`）
+- GitHub Token
+- Organization 名称
+
+**自动检查**:
+- ✓ 磁盘空间（需要 5GB）
 
 ### 3. 验证
 ```
