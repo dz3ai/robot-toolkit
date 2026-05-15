@@ -21,7 +21,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-13, windows-2022]
+        os: [ubuntu-22.04, windows-2022]
 
     steps:
       - uses: actions/checkout@v4
@@ -38,17 +38,38 @@ jobs:
           CIBW_BUILD: cp310-* cp311-* cp312-*
           CIBW_SKIP: "*-musllinux_* pp* *-win32 *-manylinux_i686"
           CIBW_ARCHS_LINUX: auto64
-          CIBW_ARCHS_MACOS: x86_64 arm64
           CIBW_ARCHS_WINDOWS: auto64
+          CIBW_TEST_COMMAND: pytest {project}/test_ik.py {project}/test_dyn.py -v --no-header
+          CIBW_TEST_REQUIRES: pytest numpy
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: ./wheelhouse/*.whl
+
+  build_macos:
+    name: Build macOS wheels (self-hosted)
+    runs-on: [self-hosted, macos]
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.17.0
+        env:
+          CIBW_BUILD: cp310-* cp311-* cp312-*
+          CIBW_SKIP: "*-musllinux_* pp*"
+          CIBW_ARCHS_MACOS: x86_64 arm64
           CIBW_BEFORE_BUILD_MACOS: brew install cmake
-          CIBW_BEFORE_BUILD_WINDOWS: pip install cmake
           CIBW_TEST_COMMAND: pytest {project}/test_ik.py {project}/test_dyn.py -v --no-header
           CIBW_TEST_REQUIRES: pytest numpy
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.9
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}
+          name: wheels-macos
           path: ./wheelhouse/*.whl
 
   build_sdist:
@@ -79,7 +100,7 @@ jobs:
           path: dist/*.tar.gz
 
   release:
-    needs: [build_wheels, build_sdist]
+    needs: [build_wheels, build_macos, build_sdist]
     runs-on: ubuntu-22.04
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true

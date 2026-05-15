@@ -20,7 +20,7 @@ ext_dyn = Extension(
 
 setup(
     name="robot-ik",
-    version="0.2.0",
+    version="0.3.0",
     description="Fast 6-DOF Inverse Kinematics and Rigid Body Dynamics (C++ accelerated)",
     author="Danny Zeng",
     license="MIT",
